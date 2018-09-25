@@ -17,15 +17,21 @@ Feature engineering, as always, is the greatest challenge. From shopping history
 
 I then built a classification model using these features. `PySpark ML`, compared to `scikit-learn`, has limited algorithms. I compared the performances of logistic regression, random forest classifier, and gradient boosting classifier and eventually chose gradient boosting classifier. A grid search of hyperparameters was performed with 6-fold cross-validation. 
 
+The predictive performance is less than 
 
 ## Usage ##
-This analysis requires Spark 2.3.1 and Python 3.6.5. 
+This analysis requires `Spark 2.3.1` and `Python 3.6.5`. 
 
-First download all the data from the Challenge's page. Then run these scripts in the "feature_engineering" folder to create features: 
+First download all the data from the Challenge's page.
+
+Run load_raw_to_spark.py and then reduce_transactions.py. Recall that the original shopping history covers all purchased items; reduce_transactions.py selects the shopping records of the company/category/brand related to the customer's coupon offer. 
+
+Then run the scripts in the "feature_engineering" folder to create features; the order of these scripts does not matter and one can skip any of them if so chooses: 
 * create_base_features.py
 * create_product_features.py
 * create_user_features.py
 * create_competition_features.py. 
-The order of these four scripts does not matter and one can skip some scripts if so chooses. 
 
-Then run merge_features.py. If any of the earlier feature construction scripts are skipped, the corresponding parquet files need to be moved from this script. 
+Then run merge_features.py. If any of the earlier feature construction scripts are skipped, the corresponding parquet files need to be removed from this script. 
+
+Finally run train_predict.py. This script generates a csv submission file. 
