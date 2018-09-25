@@ -30,7 +30,7 @@ Then run the scripts in the "feature_engineering" folder to create features; the
 * create_base_features.py
 * create_product_features.py
 * create_user_features.py
-* create_competition_features.py
+* create_competition_features.py.
 
 Then run merge_features.py. If any of the earlier feature construction scripts are skipped, the corresponding parquet files need to be removed from this script. 
 
