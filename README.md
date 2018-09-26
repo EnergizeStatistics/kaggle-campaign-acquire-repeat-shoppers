@@ -17,6 +17,8 @@ Feature engineering, as always, is the greatest challenge. From shopping history
 
 I then built a classification model using these features. `PySpark ML`, compared to `scikit-learn`, has limited algorithms. I compared the performances of logistic regression, random forest classifier, and gradient boosting classifier and eventually chose gradient boosting classifier. A grid search of hyperparameters was performed with 6-fold cross-validation. 
 
+Inspired by [Triskelion](https://mlwave.com/predicting-repeat-buyers-vowpal-wabbit/), [auduno](https://github.com/auduno/Kaggle-Acquire-Valued-Shoppers-Challenge), and many others. 
+
 ## Usage ##
 This analysis requires `Spark 2.3.1` and `Python 3.6.5`. 
 
