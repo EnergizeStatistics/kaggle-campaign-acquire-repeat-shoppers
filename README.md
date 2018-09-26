@@ -17,8 +17,6 @@ Feature engineering, as always, is the greatest challenge. From shopping history
 
 I then built a classification model using these features. `PySpark ML`, compared to `scikit-learn`, has limited algorithms. I compared the performances of logistic regression, random forest classifier, and gradient boosting classifier and eventually chose gradient boosting classifier. A grid search of hyperparameters was performed with 6-fold cross-validation. 
 
-The predictive performance is less than 
-
 ## Usage ##
 This analysis requires `Spark 2.3.1` and `Python 3.6.5`. 
 
@@ -35,3 +33,6 @@ Then run the scripts in the "feature_engineering" folder to create features; the
 Then run merge_features.py. If any of the earlier feature construction scripts are skipped, the corresponding parquet files need to be removed from this script. 
 
 Finally run train_predict.py. This script generates a csv submission file. 
+
+## Potential Improvement ##
+Opportunties for improvement lie beyond `Spark`. If we took the data out of `Spark` and into `pandas`, we would be able to utilize the rich selection of algorithms of `sci-kit learn` at the cost of losing the distributed implementation in `Spark ML`. This approach is viable for datasets that fit in memory. We could look at feature importance and remove the non-important features in order to reduce dataset sizes. Model stacking would also be a natural step after training with various algorithms. 

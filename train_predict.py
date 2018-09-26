@@ -2,6 +2,7 @@
 import gc, time, pickle, os
 import pyspark
 import pandas as pd
+import numpy as np
 
 from pyspark.ml.feature import StringIndexer, VectorAssembler
 from pyspark.ml.classification import RandomForestClassifier, GBTClassifier
@@ -62,19 +63,30 @@ crossval = CrossValidator(
     evaluator=BinaryClassificationEvaluator(metricName="areaUnderROC"), \
     numFolds=6)
 
+# train cross-validation model
 cvModel = crossval.fit(all_features_train)
 
+# show the best hyperparameters
+EstimatorParamMaps = cvModel.getEstimatorParamMaps()[ np.argmax(cvModel.avgMetrics) ]
+
+# now train final model with optimized hyperparameters and all training data
+clf_gbt_fn = GBTClassifier(featuresCol='features', labelCol="label", seed=0, maxDepth=6, maxBins=20, maxIter=20)
+pipeline_fn = Pipeline(stages=[assembler_features, labelIndexer, clf_gbt_fn])
+
+fnModel = pipeline_fn.fit(all_features_train)
+
 # make predictions on training. cvModel uses the best model found
-predicted = cvModel.transform(all_features_train)
+predicted = fnModel.transform(all_features_train)
 
 # save model
-cvModel.save(os.path.join(data_dir, 'model_GBTClassifer'))
+fnModel.save(os.path.join(data_dir, 'model_GBTClassifer'))
 
 evaluator = BinaryClassificationEvaluator()
-print("Training ROC with 6-fold cross validation: {:.6f}"      .format(evaluator.evaluate(predicted, {evaluator.metricName: "areaUnderROC"})))
+print("Training ROC with 6-fold cross validation: {:.6f}"\
+      .format(evaluator.evaluate(predicted, {evaluator.metricName: "areaUnderROC"})))
 
 # make predictions on test set
-test_predicted = cvModel.transform(all_features_test)
+test_predicted = fnModel.transform(all_features_test)
 
 # extract predicted probability for repeater=t
 secondelement=udf(lambda v:float(v[1]), FloatType())
@@ -83,9 +95,10 @@ submit_pred_prob = test_predicted.select(secondelement('probability'))
 # generate submission file
 df_submit_pred_prob = submit_pred_prob.toPandas()
 submission_id = pd.read_csv(data_dir+'sampleSubmission.csv')
-submission_gbt = pd.concat([submission_id, df_submit_pred_prob], sort=False, axis=1).drop('repeatProbability', axis=1).rename({'<lambda>(probability)':'repeatProbability'}, axis='columns')
+submission_gbt = pd.concat([submission_id, df_submit_pred_prob], sort=False, axis=1)\
+                            .drop('repeatProbability', axis=1)\
+                            .rename({'<lambda>(probability)':'repeatProbability'}, axis='columns')
 
 assert len(submission_id)==len(df_submit_pred_prob)
 
 submission_gbt.to_csv(data_dir+'submission_gbt.csv', index=False)
-
